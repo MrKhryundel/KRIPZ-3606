@@ -1,0 +1,34 @@
+<nav class="navbar navbar-expand-lg navbar-light">
+    <div class="container">
+        <a class="navbar-brand" href="/">
+            <i class="fas fa-store mr-2"></i>Продуктовий магазин
+        </a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav mr-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="/">
+                        <i class="fas fa-home mr-1"></i> Головна
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/products">
+                        <i class="fas fa-shopping-basket mr-1"></i> Товари
+                    </a>
+                </li>
+            </ul>
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                    <a class="nav-link" href="/cart">
+                        <i class="fas fa-shopping-cart"></i> Кошик
+                        <% if (typeof cart !== 'undefined' && cart.length > 0) { %>
+                            <span class="badge badge-pill badge-primary"><%= cart.length %></span>
+                        <% } %>
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>

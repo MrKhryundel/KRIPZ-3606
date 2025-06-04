@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %></title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/admin/dashboard">Admin Panel</a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav mr-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/admin/dashboard">Dashboard</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/admin/products/add">Add Product</a>
+                    </li>
+                    <li class="nav-item active">
+                        <a class="nav-link" href="/admin/orders">Orders</a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/admin/logout">Logout</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <%- include('../partials/messages') %>
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>Управління замовленнями</h2>
+            <div>
+                <span class="mr-3">
+                    <i class="fas fa-filter"></i> Фільтр за статусом:
+                    <select id="statusFilter" class="form-control-sm">
+                        <option value="">Всі</option>
+                        <option value="прийнято">Прийнято</option>
+                        <option value="оплачено">Оплачено</option>
+                        <option value="в обробці">В обробці</option>
+                        <option value="відправлено">Відправлено</option>
+                        <option value="доставлено">Доставлено</option>
+                    </select>
+                </span>
+                <button class="btn btn-sm btn-outline-secondary" onclick="window.location.reload();">
+                    <i class="fas fa-sync"></i> Оновити
+                </button>
+            </div>
+        </div>
+        
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead class="thead-dark">
+                    <tr>
+                        <th>ID замовлення</th>
+                        <th>Клієнт</th>
+                        <th>Сума</th>
+                        <th>Статус</th>
+                        <th>Доставка</th>
+                        <th>Остання зміна</th>
+                        <th>Дії</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% orders.forEach(function(order) { %>
+                    <tr class="order-row" data-status="<%= order.status %>">
+                        <tr>
+                            <td><%= order._id %></td>
+                            <td>
+                                <%= order.customerName %><br>
+                                <small><%= order.customerEmail %></small><br>
+                                <small><%= order.customerPhone %></small>
+                            </td>
+                            <td><%= order.totalAmount %> ₴</td>
+                            <td>
+                                <form action="/admin/orders/<%= order._id %>/status" method="POST" class="status-form">                                <select name="status" class="form-control form-control-sm status-select" 
+                                            data-order-id="<%= order._id %>" 
+                                            onChange="confirmStatusChange(this)">
+                                        <option value="прийнято" <%= order.status === 'прийнято' ? 'selected' : '' %>>Прийнято</option>
+                                        <option value="оплачено" <%= order.status === 'оплачено' ? 'selected' : '' %>>Оплачено</option>
+                                        <option value="в обробці" <%= order.status === 'в обробці' ? 'selected' : '' %>>В обробці</option>
+                                        <option value="відправлено" <%= order.status === 'відправлено' ? 'selected' : '' %>>Відправлено</option>
+                                        <option value="доставлено" <%= order.status === 'доставлено' ? 'selected' : '' %>>Доставлено</option>
+                                    </select>
+                                    <% 
+                                    let statusClass = '';
+                                    switch(order.status) {
+                                        case 'прийнято': statusClass = 'info'; break;
+                                        case 'оплачено': statusClass = 'primary'; break;
+                                        case 'в обробці': statusClass = 'warning'; break;
+                                        case 'відправлено': statusClass = 'success'; break;
+                                        case 'доставлено': statusClass = 'secondary'; break;
+                                    }
+                                    %>
+                                    <span class="badge badge-<%= statusClass %> ml-2">
+                                        <%= order.status %>
+                                    </span>
+                                </form>
+                            </td>
+                            <td>
+                                <%= order.deliveryMethod %><br>
+                                <small><%= order.address %></small>
+                            </td>
+                            <td><%= new Date(order.createdAt).toLocaleString() %></td>
+                            <td>
+                                <button type="button" class="btn btn-sm btn-info" data-toggle="modal" 
+                                        data-target="#orderModal<%= order._id %>">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        
+                        <!-- Modal for order details -->
+                        <div class="modal fade" id="orderModal<%= order._id %>" tabindex="-1" role="dialog">
+                            <div class="modal-dialog modal-lg">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title">Деталі замовлення #<%= order._id %></h5>
+                                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                                    </div>                                    <div class="modal-body">
+                                        <div class="row mb-4">
+                                            <div class="col-md-6">
+                                                <h6>Статус замовлення</h6>
+                                                <div class="status-timeline">
+                                                    <% order.statusHistory.forEach(function(hist) { %>
+                                                        <div class="status-item">
+                                                            <div class="status-badge badge badge-<%= 
+                                                                hist.status === 'прийнято' ? 'info' :
+                                                                hist.status === 'оплачено' ? 'primary' :
+                                                                hist.status === 'в обробці' ? 'warning' :
+                                                                hist.status === 'відправлено' ? 'success' :
+                                                                'secondary'
+                                                            %>">
+                                                                <%= hist.status %>
+                                                            </div>
+                                                            <div class="status-time">
+                                                                <%= new Date(hist.timestamp).toLocaleString() %>
+                                                            </div>
+                                                        </div>
+                                                    <% }); %>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <h6>Контактна інформація</h6>
+                                                <p><strong>Ім'я:</strong> <%= order.customerName %></p>
+                                                <p><strong>Email:</strong> <%= order.customerEmail %></p>
+                                                <p><strong>Телефон:</strong> <%= order.customerPhone %></p>
+                                                <p><strong>Спосіб доставки:</strong> <%= order.deliveryMethod %></p>
+                                                <p><strong>Адреса:</strong> <%= order.address %></p>
+                                                <% if (order.deliveryDetails) { %>
+                                                    <p><strong>Деталі доставки:</strong> <%= order.deliveryDetails %></p>
+                                                <% } %>
+                                            </div>
+                                        </div>
+                                        
+                                        <h6>Товари:</h6>
+                                        <table class="table">
+                                            <thead>
+                                                <tr>
+                                                    <th>Товар</th>
+                                                    <th>Кількість</th>
+                                                    <th>Ціна</th>
+                                                    <th>Сума</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <% order.products.forEach(function(item) { %>
+                                                    <tr>
+                                                        <td>
+                                                            <img src="<%= item.product.image %>" alt="<%= item.product.name %>" 
+                                                                style="width: 50px; height: 50px; object-fit: cover;">
+                                                            <%= item.product.name %>
+                                                        </td>
+                                                        <td><%= item.quantity %></td>
+                                                        <td><%= item.product.price %> ₴</td>
+                                                        <td><%= item.product.price * item.quantity %> ₴</td>
+                                                    </tr>
+                                                <% }); %>
+                                            </tbody>
+                                            <tfoot>
+                                                <tr>
+                                                    <td colspan="3" class="text-right"><strong>Загальна сума:</strong></td>
+                                                    <td><strong><%= order.totalAmount %> ₴</strong></td>
+                                                </tr>
+                                            </tfoot>
+                                        </table>
+                                        
+                                        <h6>Інформація про доставку:</h6>
+                                        <p>
+                                            <strong>Спосіб доставки:</strong> <%= order.deliveryMethod %><br>
+                                            <strong>Адреса:</strong> <%= order.address %><br>
+                                            <% if (order.deliveryDetails) { %>
+                                                <strong>Деталі:</strong> <%= order.deliveryDetails %>
+                                            <% } %>
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    <% }); %>
+                </tbody>
+            </table>
+        </div>
+    </div>    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    
+    <script>
+        function confirmStatusChange(select) {
+            const newStatus = select.value;
+            const oldStatus = select.options[select.selectedIndex].getAttribute('data-old-status');
+            const form = select.closest('form');
+            
+            if (confirm(`Ви впевнені, що хочете змінити статус замовлення на "${newStatus}"? Клієнту буде надіслано email з повідомленням.`)) {
+                form.submit();
+            } else {
+                select.value = oldStatus;
+            }
+        }
+
+        document.getElementById('statusFilter').addEventListener('change', function() {
+            const status = this.value;
+            const rows = document.querySelectorAll('.order-row');
+            
+            rows.forEach(row => {
+                if (!status || row.dataset.status === status) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        });
+
+        setInterval(() => {
+            window.location.reload();
+        }, 30000);
+    </script>
+</body>
+</html>

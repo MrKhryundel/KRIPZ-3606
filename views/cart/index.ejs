@@ -1,0 +1,91 @@
+<div class="container">
+    <h2>Кошик</h2>
+    <% if (cart && cart.length > 0) { %>
+        <div class="row">
+            <div class="col-md-8">
+                <% let total = 0; %>
+                <% cart.forEach(function(item) { %>
+                    <div class="card mb-3">
+                        <div class="row no-gutters">
+                            <div class="col-md-4">
+                                <img src="<%= item.product.image %>" class="card-img" alt="<%= item.product.name %>">
+                            </div>
+                            <div class="col-md-8">
+                                <div class="card-body">
+                                    <h5 class="card-title"><%= item.product.name %></h5>
+                                    <p class="card-text">Ціна: <%= item.product.price %> ₴</p>
+                                    <p class="card-text">Кількість: <%= item.quantity %></p>
+                                    <p class="card-text">Сума: <%= item.product.price * item.quantity %> ₴</p>
+                                    <form action="/cart/remove/<%= item.product._id %>" method="POST" style="display: inline;">
+                                        <button type="submit" class="btn btn-danger btn-sm">Видалити</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <% total += item.product.price * item.quantity; %>
+                <% }); %>
+            </div>
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Підсумок замовлення</h5>
+                        <p class="card-text">Загальна сума: <%= total %> ₴</p>
+                        <form action="/cart/checkout" method="POST">
+                            <input type="hidden" name="totalAmount" value="<%= total %>">                            <div class="form-group">
+                                <label for="customerName">Ім'я</label>
+                                <input type="text" class="form-control" id="customerName" name="customerName" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="customerEmail">Email</label>
+                                <input type="email" class="form-control" id="customerEmail" name="customerEmail" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="customerPhone">Телефон</label>
+                                <input type="tel" class="form-control" id="customerPhone" name="customerPhone" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="deliveryMethod">Спосіб доставки</label>
+                                <select class="form-control" id="deliveryMethod" name="deliveryMethod" required>
+                                    <option value="">Оберіть спосіб доставки</option>
+                                    <option value="Кур'єрська доставка">Кур'єрська доставка</option>
+                                    <option value="Самовивіз">Самовивіз</option>
+                                    <option value="Нова Пошта">Нова Пошта</option>
+                                    <option value="Укрпошта">Укрпошта</option>
+                                </select>
+                            </div>
+
+                            <div id="deliveryDetailsGroup">
+                                <div class="form-group">
+                                    <label for="address">Адреса доставки</label>
+                                    <textarea class="form-control" id="address" name="address" required></textarea>
+                                </div>
+                                <div class="form-group">
+                                    <label for="deliveryDetails">Деталі доставки</label>
+                                    <textarea class="form-control" id="deliveryDetails" name="deliveryDetails" placeholder="Номер відділення, побажання щодо часу доставки тощо"></textarea>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="paymentMethod">Спосіб оплати</label>
+                                <select class="form-control" id="paymentMethod" name="paymentMethod" required>
+                                    <option value="">Оберіть спосіб оплати</option>
+                                    <option value="Оплата онлайн">Оплата онлайн</option>
+                                    <option value="Оплата при отриманні">Оплата при отриманні</option>
+                                    <option value="Оплата карткою кур'єру">Оплата карткою кур'єру</option>
+                                </select>
+                            </div>
+
+                            <button type="submit" class="btn btn-success btn-block">Оформити замовлення</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    <% } else { %>
+        <div class="alert alert-info">
+            Ваш кошик порожній. <a href="/products">Продовжити покупки</a>
+        </div>
+    <% } %>
+</div>

@@ -1,0 +1,103 @@
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-body">
+                <form action="/products" method="GET" class="mb-0">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label for="search">Пошук</label>
+                                <input type="text" class="form-control" id="search" name="search" 
+                                    placeholder="Назва або бренд" value="<%= filters.search || '' %>">
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <label for="category">Категорія</label>
+                                <select class="form-control" id="category" name="category">
+                                    <option value="">Всі категорії</option>
+                                    <% categories.forEach(function(cat) { %>
+                                        <option value="<%= cat %>" <%= filters.category === cat ? 'selected' : '' %>>
+                                            <%= cat %>
+                                        </option>
+                                    <% }); %>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <label for="country">Країна</label>
+                                <select class="form-control" id="country" name="country">
+                                    <option value="">Всі країни</option>
+                                    <% countries.forEach(function(country) { %>
+                                        <option value="<%= country %>" <%= filters.country === country ? 'selected' : '' %>>
+                                            <%= country %>
+                                        </option>
+                                    <% }); %>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <label for="minPrice">Ціна від</label>
+                                <input type="number" class="form-control" id="minPrice" name="minPrice" 
+                                    value="<%= filters.minPrice || '' %>" min="0">
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <label for="maxPrice">Ціна до</label>
+                                <input type="number" class="form-control" id="maxPrice" name="maxPrice" 
+                                    value="<%= filters.maxPrice || '' %>" min="0">
+                            </div>
+                        </div>
+                        <div class="col-md-1">
+                            <div class="form-group">
+                                <label class="d-block">&nbsp;</label>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-search"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<h2>Товари</h2>
+<div class="row">
+    <% if (products.length > 0) { %>
+        <% products.forEach(function(product) { %>
+            <div class="col-md-4 mb-4">
+                <div class="card h-100">
+                    <img src="<%= product.image %>" class="card-img-top" alt="<%= product.name %>">
+                    <div class="card-body">
+                        <h5 class="card-title"><%= product.name %></h5>
+                        <p class="card-text mb-1"><small class="text-muted"><%= product.category %></small></p>
+                        <p class="card-text"><%= product.description %></p>
+                        <p class="card-text">
+                            <strong>Ціна: <%= product.price %> ₴</strong> / 
+                            <%= product.weight %><%= product.weightUnit %>
+                        </p>
+                        <p class="card-text"><small class="text-muted">Виробник: <%= product.country %></small></p>                    <% if (product.inStock) { %>
+                        <form action="/cart/add/<%= product._id %>" method="POST">
+                            <div class="form-group">
+                                <input type="number" name="quantity" value="1" min="1" class="form-control mb-2">
+                            </div>
+                            <button type="submit" class="btn btn-primary">Додати в кошик</button>
+                        </form>
+                    <% } else { %>
+                        <button class="btn btn-secondary" disabled>Немає в наявності</button>
+                    <% } %>
+                    </div>
+                </div>
+            </div>
+        <% }); %>
+    <% } else { %>
+        <div class="col-12">
+            <p class="text-center">Товари не знайдено</p>
+        </div>
+    <% } %>
+</div>
